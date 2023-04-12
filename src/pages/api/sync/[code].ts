@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { readFile } from "fs/promises";
-import path from "path";
 import Cors from "cors";
 import { runMiddleware } from "@/utils/runMiddleware";
 
@@ -14,7 +13,7 @@ export default async function handler(
   res: NextApiResponse<string>
 ) {
   await runMiddleware(req, res, cors);
-  const data = await readFile(`public/data/${req.query.code}.json`, "utf8");
+  const data = await readFile(`/tmp/${req.query.code}.json`, "utf8");
 
   res.send(data);
 }

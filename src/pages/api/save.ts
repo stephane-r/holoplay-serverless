@@ -19,7 +19,7 @@ export default async function handler(
   await runMiddleware(req, res, cors);
 
   const code = Math.floor(Math.random() * 900000);
-  await writeFile(`public/data/${code}.json`, JSON.stringify(req.body), "utf8");
+  await writeFile(`/tmp/${code}.json`, JSON.stringify(req.body), "utf8");
 
   res.status(200).json({ code });
 }
