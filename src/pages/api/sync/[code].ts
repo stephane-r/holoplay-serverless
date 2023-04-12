@@ -14,8 +14,7 @@ export default async function handler(
   res: NextApiResponse<string>
 ) {
   await runMiddleware(req, res, cors);
+  const data = await readFile(`public/data/${req.query.code}.json`, "utf8");
 
-  const file = path.join(process.cwd(), "data", `${req.query.code}.json`);
-  const data = await readFile(file, "utf8");
   res.send(data);
 }
