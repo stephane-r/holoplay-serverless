@@ -1,30 +1,22 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import Cors from "cors";
-import { runMiddleware } from "@/utils/runMiddleware";
+import { geolocation, ipAddress } from "@vercel/edge";
 
-const cors = Cors({
-  methods: ["GET"],
-  origin: "*",
-});
-
-type Data = {
-  countryCode: string | null;
+export const config = {
+  runtime: "edge",
 };
 
-type Geo = {
-  city?: string;
-  country?: string;
-  region?: string;
-};
+export default async function handler(request: Request) {
+  // The geolocation helper pulls out the geoIP headers from the
+  const geo = geolocation(request) || {};
+  // The IP helper does the same function for the user's IP address
+  const ip = ipAddress(request) || null;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  await runMiddleware(req, res, cors);
-
-  // @ts-ignore
-  const geo = req.geo as Geo;
-
-  res.status(200).json({ countryCode: geo?.region ?? null });
+  return new Response(
+    JSON.stringify({
+      ...geo,
+      ip,
+    }),
+    {
+      headers: { "content-type": "application/json" },
+    }
+  );
 }
