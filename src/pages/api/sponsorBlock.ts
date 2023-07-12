@@ -34,7 +34,8 @@ export default async function handler(
 
     const segments = await sponsorBlock.getSegments(
       req.query.videoId as string,
-      (req.query.categories as Category[]) ?? Constants.ALL_CATEGORIES
+      ((req.query.categories as string).split(",") as Category[]) ??
+        Constants.ALL_CATEGORIES
     );
 
     res.status(200).json({ segments });
