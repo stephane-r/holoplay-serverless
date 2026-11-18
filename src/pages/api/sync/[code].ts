@@ -1,25 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import Cors from "cors";
-import { runMiddleware } from "@/utils/runMiddleware";
-import { cache } from "@/utils/cache";
-import { Key } from "node-cache";
+import { withCors } from "@/utils/withCors";
+import { getSyncPayload } from "@/utils/cache";
 
-const cors = Cors({
-  methods: ["GET"],
-  origin: "*",
-});
-
-export default async function handler(
+export default withCors(["GET"], async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse
 ) {
-  await runMiddleware(req, res, cors);
-  const data = cache.get(req.query.code as Key) as string;
+  const payload = await getSyncPayload(req.query.code as string);
 
-  if (!data) {
+  if (!payload) {
     res.status(404).send("Not found");
     return;
   }
 
-  res.send(data);
-}
+  res.status(200).json(payload);
+});

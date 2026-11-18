@@ -1,12 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import Cors from "cors";
-import { runMiddleware } from "@/utils/runMiddleware";
-import { cache } from "@/utils/cache";
-
-const cors = Cors({
-  methods: ["POST"],
-  origin: "*",
-});
+import { withCors } from "@/utils/withCors";
+import { createSyncCode } from "@/utils/cache";
 
 export const config = {
   api: {
@@ -17,17 +11,14 @@ export const config = {
 };
 
 type Data = {
-  code: number;
+  code: string;
 };
 
-export default async function handler(
+export default withCors(["POST"], async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  await runMiddleware(req, res, cors);
-
-  const code = Math.floor(Math.random() * 900000);
-  cache.set(code, JSON.stringify(req.body));
+  const code = await createSyncCode(req.body);
 
   res.status(200).json({ code });
-}
+});

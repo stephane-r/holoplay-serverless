@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+This project needs an [Upstash Redis](https://upstash.com) database for `/api/save`, `/api/sync/[code]`, `/api/remotePlay` and `/api/clearRemotePlay` (sync codes and remote-play pairing). Create a database (`curl -X POST https://upstash.com/start-redis` works without signup), then set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in `.env.local` (and in the Vercel project's environment variables for deploys).
+
 First, run the development server:
 
 ```bash
