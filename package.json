@@ -2,27 +2,32 @@
   "name": "holoplay-serverless",
   "version": "0.4.1",
   "private": true,
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@types/cors": "^2.8.13",
-    "@types/node": "^20.3.3",
-    "@types/react": "18.2.14",
-    "@types/react-dom": "18.2.6",
-    "@vercel/edge": "^0.3.4",
-    "cors": "^2.8.5",
-    "eslint": "8.44.0",
-    "eslint-config-next": "13.4.8",
-    "next": "13.4.8",
-    "node-cache": "^5.1.2",
+    "@types/cors": "^2.8.19",
+    "@types/node": "^26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@upstash/redis": "^1.41.0",
+    "cors": "^2.8.6",
+    "eslint": "10.15.0",
+    "eslint-config-next": "16.4.6",
+    "next": "16.4.6",
     "node-youtube-music": "^0.10.3",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "sponsorblock-api": "^0.2.4",
-    "typescript": "5.1.6"
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "axios": "^1.21.1"
   }
 }

@@ -1,32 +1,19 @@
 import { SponsorBlock, Category, Constants } from "sponsorblock-api";
-import Cors from "cors";
-import { runMiddleware } from "@/utils/runMiddleware";
 import { NextApiRequest, NextApiResponse } from "next";
-
-const cors = Cors({
-  methods: ["POST"],
-  origin: "*",
-});
+import { withCors } from "@/utils/withCors";
 
 type Data = {
   segments?: any;
   error?: string;
 };
 
-interface Query {
-  deviceId: string;
-  videoId: string;
-  categories?: Category[];
-}
-
-export default async function handler(
+export default withCors(["POST"], async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  await runMiddleware(req, res, cors);
-
   if (!req.query.deviceId || !req.query.videoId) {
     res.status(400).json({ error: "Missing deviceId or videoId" });
+    return;
   }
 
   try {
@@ -34,7 +21,7 @@ export default async function handler(
 
     const segments = await sponsorBlock.getSegments(
       req.query.videoId as string,
-      ((req.query.categories as string).split(",") as Category[]) ??
+      ((req.query.categories as string)?.split(",") as Category[]) ??
         Constants.ALL_CATEGORIES
     );
 
@@ -42,4 +29,4 @@ export default async function handler(
   } catch {
     res.status(200).json({ segments: [] });
   }
-}
+});

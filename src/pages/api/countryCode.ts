@@ -1,26 +1,36 @@
-import { geolocation, ipAddress } from "@vercel/edge";
-import cors from "../../lib/cors";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { withCors } from "@/utils/withCors";
 
-export const config = {
-  runtime: "edge",
+const FLAG_UNICODE_OFFSET = 127397;
+
+const countryFlag = (countryCode?: string) => {
+  if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return undefined;
+  return String.fromCodePoint(
+    ...countryCode
+      .split("")
+      .map((char) => FLAG_UNICODE_OFFSET + char.charCodeAt(0))
+  );
 };
 
-export default async function handler(request: Request, response: Response) {
-  // The geolocation helper pulls out the geoIP headers from the
-  const geo = geolocation(request) || {};
-  // The IP helper does the same function for the user's IP address
-  const ip = ipAddress(request) || null;
+const header = (req: NextApiRequest, name: string) => {
+  const value = req.headers[name];
+  return Array.isArray(value) ? value[0] : value;
+};
 
-  return cors(
-    request,
-    new Response(
-      JSON.stringify({
-        ...geo,
-        ip,
-      }),
-      {
-        headers: { "content-type": "application/json" },
-      }
-    )
-  );
-}
+export default withCors(["GET"], async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const country = header(req, "x-vercel-ip-country");
+
+  res.status(200).json({
+    city: header(req, "x-vercel-ip-city"),
+    country,
+    flag: countryFlag(country),
+    countryRegion: header(req, "x-vercel-ip-country-region"),
+    latitude: header(req, "x-vercel-ip-latitude"),
+    longitude: header(req, "x-vercel-ip-longitude"),
+    postalCode: header(req, "x-vercel-ip-postal-code"),
+    ip: header(req, "x-real-ip") ?? req.socket.remoteAddress ?? null,
+  });
+});

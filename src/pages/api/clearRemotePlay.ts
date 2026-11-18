@@ -1,41 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import Cors from "cors";
-import { runMiddleware } from "@/utils/runMiddleware";
-import { CacheKeys, cache, getCachedDevices } from "@/utils/cache";
-import { Device } from "@/interfaces/Device";
+import { withCors } from "@/utils/withCors";
+import { deleteDevice } from "@/utils/cache";
 
-const cors = Cors({
-  methods: ["GET"],
-  origin: "*",
-});
-
-type GetData = {
-  videoId: string;
-};
-
-type PostData = {
+type Data = {
   ok: boolean;
 };
 
-export default async function handler(
+export default withCors(["GET"], async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<PostData | { data: Device | null }>
+  res: NextApiResponse<Data>
 ) {
-  await runMiddleware(req, res, cors);
+  await deleteDevice(req.query.deviceUuid as string);
 
-  const cachedDevices = getCachedDevices();
-
-  if (!cachedDevices) {
-    return res.send({ ok: false });
-  }
-
-  cache.set(
-    CacheKeys.devices,
-    JSON.stringify(
-      cachedDevices.filter(
-        (device) => device.deviceUuid !== req.body.deviceUuid
-      )
-    )
-  );
   res.send({ ok: true });
-}
+});

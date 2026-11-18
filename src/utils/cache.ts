@@ -1,32 +1,39 @@
+import { Redis } from "@upstash/redis";
 import { Device } from "@/interfaces/Device";
-import NodeCache from "node-cache";
 
-export enum CacheKeys {
-  devices = "devices",
-}
+const redis = Redis.fromEnv();
 
-export const cache = new NodeCache({
-  checkperiod: 600, // in seconds
-});
+const SYNC_CODE_TTL_SECONDS = 60 * 15;
+const DEVICE_TTL_SECONDS = 60 * 60;
 
-export const getCachedDevices = () => {
-  const cachedDevices = cache.get(CacheKeys.devices) as string | undefined;
+const syncKey = (code: string) => `sync:${code}`;
+const deviceKey = (deviceUuid: string) => `device:${deviceUuid}`;
 
-  if (cachedDevices) {
-    return JSON.parse(cachedDevices) as Device[];
-  }
+export const createSyncCode = async (payload: unknown) => {
+  let code: string;
+  let isTaken: number;
 
-  return null;
+  do {
+    code = String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
+    isTaken = await redis.exists(syncKey(code));
+  } while (isTaken);
+
+  await redis.set(syncKey(code), payload, { ex: SYNC_CODE_TTL_SECONDS });
+
+  return code;
 };
 
-export const getCachedDevice = (deviceUuid: string) => {
-  const cachedDevices = getCachedDevices();
-  if (!cachedDevices) return null;
-  return cachedDevices.find(
-    (device: any) => device.deviceUuid === deviceUuid
-  ) as Device;
-};
+export const getSyncPayload = (code: string) => redis.get(syncKey(code));
 
-export const cacheDevices = (devices: Device[]) => {
-  cache.set(CacheKeys.devices, JSON.stringify(devices));
-};
+export const getDevice = (deviceUuid: string) =>
+  redis.get<Device>(deviceKey(deviceUuid));
+
+export const setDevice = (deviceUuid: string, videoId: string) =>
+  redis.set<Device>(
+    deviceKey(deviceUuid),
+    { deviceUuid, videoId },
+    { ex: DEVICE_TTL_SECONDS }
+  );
+
+export const deleteDevice = (deviceUuid: string) =>
+  redis.del(deviceKey(deviceUuid));
