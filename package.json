@@ -21,11 +21,11 @@
     "eslint": "10.15.0",
     "eslint-config-next": "16.4.6",
     "next": "16.4.6",
-    "node-youtube-music": "^0.10.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "sponsorblock-api": "^0.2.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "ytmusic-api": "^6.0.0"
   },
   "overrides": {
     "axios": "^1.21.1"
